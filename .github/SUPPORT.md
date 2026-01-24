@@ -1,19 +1,19 @@
-# Support policy
+# Support
 
-Agent OS is free and open source. To keep it sustainable, you can seek support in any of these ways:
+Align is free and open source.
 
-- **[Documentation](https://buildermethods.com/agent-os):** Complete and up-to-date guides for installation, updating, and usage of Agent OS.
+## Getting Help
 
-- **[Community Support (Free)](https://github.com/buildermethods/agent-os/discussions):** Ask & answer questions with other users in the **Q&A** category of GitHub Discussions.
-
-- **[Official Support (Paid)](https://buildermethods.com/pro):** For guaranteed responses from Brian & team, join **Builder Methods Pro**.
-
----
+- **[GitHub Issues](../../issues):** Report bugs and request features
+- **[GitHub Discussions](../../discussions):** Ask questions and share ideas
 
 ## Bugs
-- Post suspected bugs in the **Bugs category** of Discussions.  Maintainers may promote confirmed bugs to Issues for tracking and fixes.
 
----
+Post suspected bugs in GitHub Issues with:
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details
 
-## Feature ideas
-Use the **Ideas category** of Discussions to propose and upvote new features and integration requests.
+## Feature Ideas
+
+Open a GitHub Issue or Discussion to propose new features.

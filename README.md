@@ -1,41 +1,55 @@
-<img width="1200" height="675" alt="Agent OS" src="https://github.com/user-attachments/assets/97ad4491-d199-4b9b-9482-ae710291dfb4" />
+# Align
 
-## Agents that build the way you would
+A lightweight framework for keeping AI agents aligned with your project.
 
-[Agent OS](https://buildermethods.com/agent-os) helps you shape better specs, keeps agents aligned in a lightweight system that fits how you already build.
+## Philosophy
 
-Works alongside Claude Code, Cursor, Antigravity, and other AI tools. Any language, any framework.
+`align/` is scaffolding — essential while building, removable when done.
+`docs/` is permanent — what users and developers read forever.
 
-**Core capabilities:**
+## What It Does
 
-- **Discover Standards** — Extract patterns and conventions from your codebase into documented standards
-- **Deploy Standards** — Intelligently inject relevant standards based on what you're building
-- **Shape Spec** — Create better plans that lead to better builds
-- **Index Standards** — Keep your standards organized and discoverable
+- **Standards** — Document your coding patterns so agents follow them
+- **Specs** — Structure feature planning for better builds
+- **Support** — Create troubleshooting guides and runbooks
 
----
+## Structure
 
-### Documentation & Installation
+```
+align/
+├── product/      # Mission, roadmap, tech decisions
+├── standards/    # Coding standards for agent alignment
+├── features/     # Feature specifications
+└── support/      # Guides, troubleshooting, runbooks
+```
 
-Docs, installation, usage, & best practices 👉 [It's all here](https://buildermethods.com/agent-os)
+## Commands
 
----
+Available as Claude Code skills in `.claude/commands/`:
 
-### Follow updates & releases
+- **`/align`** — The main command. Auto-detects mode:
+  - **Shape mode**: Plan new work, pull standards, optionally from GitHub issues
+  - **Finalize mode**: Update specs, extract new standards, generate summary
+- **`/align-status`** — Show current alignment state, gaps, and suggestions
+- `/discover-standards` — Extract patterns from your codebase
+- `/inject-standards` — Load relevant standards into context
+- `/shape-spec` — Plan features with structure
+- `/plan-product` — Document product context
+- `/create-support-doc` — Document support procedures
 
-Read the [changelog](CHANGELOG.md)
+## Getting Started
 
-[Subscribe to be notified of major new releases of Agent OS](https://buildermethods.com/agent-os)
+1. Copy `.claude/commands/` to your project
+2. Create an `align/` directory
+3. Run `/align` — it will guide you through setup
+4. Or start with `/plan-product` to establish context first
 
----
+## Acknowledgments
 
-### Created by Brian Casel @ Builder Methods
+Heavily influenced and inspired by [Agent OS](https://github.com/buildermethods/agent-os)
+by Brian Casel and the Builder Methods team. Align takes a more generalized approach
+with added support documentation workflows.
 
-Created by Brian Casel, the creator of [Builder Methods](https://buildermethods.com), where Brian helps professional software developers and teams build with AI.
+## License
 
-Get Brian's free resources on building with AI:
-- [Builder Briefing newsletter](https://buildermethods.com)
-- [YouTube](https://youtube.com/@briancasel)
-
-Join [Builder Methods Pro](https://buildermethods.com/pro) for official support and connect with our community of AI-first builders:
-
+MIT
