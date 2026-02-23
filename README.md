@@ -64,7 +64,7 @@ align/
 
 ## Commands Reference
 
-Available as Claude Code skills in `.claude/commands/`:
+Available as Claude Code slash commands (installed to `.claude/commands/`):
 
 ### Primary
 
@@ -87,11 +87,37 @@ Available as Claude Code skills in `.claude/commands/`:
 
 - **`/create-support-doc`** — Document troubleshooting procedures and runbooks
 
-## Getting Started
+## Installation
 
-1. Copy `.claude/commands/` to your project
-2. Create an `align/` directory
-3. Follow the [Quick Start](#quick-start-by-scenario) for your scenario
+### One-Time Setup
+
+Clone the Align repo to a permanent location:
+
+```bash
+git clone https://github.com/floatingsidewal/align.git ~/align
+```
+
+### Per-Project Install
+
+From any project directory (new or existing):
+
+```bash
+cd /path/to/your/project
+~/align/scripts/install.sh
+```
+
+This creates the `align/` directory structure and copies commands to `.claude/commands/`.
+
+### Update Commands
+
+After pulling new versions of Align:
+
+```bash
+cd /path/to/your/project
+~/align/scripts/install.sh --commands-only
+```
+
+Then follow the [Quick Start](#quick-start-by-scenario) for your scenario.
 
 ## Acknowledgments
 
