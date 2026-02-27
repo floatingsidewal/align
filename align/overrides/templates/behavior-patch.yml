@@ -1,0 +1,40 @@
+# Behavior Patch Override Template
+# Use this when modifying how a skill or command behaves
+
+id: OVR-YYYY-MMDD-NNN  # Auto-generated: OVR-{year}-{monthday}-{sequence}
+type: behavior-patch
+status: active  # active, resolved
+
+# Human-readable metadata
+title: ""  # Brief description of the patch
+description: |
+  Why this patch exists and what it does.
+
+# Scope: What does this override affect?
+scope:
+  # At least one scope item required
+  skills: []        # Skills this affects: [create-api-endpoint, deploy]
+  commands: []      # Commands this affects: [align, inject-standards]
+  standards: []     # Standards this relates to: [api/validation]
+  paths: []         # File paths this affects (glob patterns): [src/api/**]
+
+# Severity determines how prominently this is surfaced
+severity: warning  # info, warning, critical
+
+# Timing
+created: ""        # ISO 8601: 2026-02-15T10:30:00Z
+created_by: ""     # Person or agent that created this
+expires: ""        # Optional: when this should be reviewed/removed
+
+# Related references
+references:
+  incident: ""     # INC-1234, or link
+  pr: ""           # PR that will absorb this
+  issue: ""        # GitHub issue tracking the fix
+
+# The actual patch instructions (also in patch.md for readability)
+patch:
+  action: insert_step  # insert_step, modify_step, add_validation, etc.
+  target: ""           # What to modify
+  content: |
+    Instructions for the patch.

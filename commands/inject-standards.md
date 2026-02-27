@@ -97,7 +97,15 @@ Format the output differently based on the detected scenario:
 
 #### Scenario: Conversation
 
-Read the standards and announce them:
+Read the standards and announce them. Also check for content-addendum overrides.
+
+**Step 5a: Check for Addendums**
+
+Read `align/overrides/registry.yml` and filter for:
+- `type: content-addendum`
+- `scope.standards` matching any of the injected standards
+
+**Step 5b: Output with Addendums**
 
 ```
 I've read the following standards as they are relevant to what we're working on:
@@ -112,12 +120,19 @@ I've read the following standards as they are relevant to what we're working on:
 
 [full content of the standard file]
 
+--- Active Addendum: OVR-2026-0214-002 ---
+[addendum content from override]
+--- End Addendum ---
+
 --- End Standard ---
 
 **Key points:**
 - All API responses use { success, data, error } envelope
 - Error codes follow AUTH_xxx, DB_xxx pattern
+- (!) Include new AUTH_EXPIRED code per active override
 ```
+
+Note active addendums in the key points with (!) indicator.
 
 ---
 
@@ -164,6 +179,10 @@ Include the following standards content in your skill:
 
 [full content of the standard file]
 
+--- Active Addendum: OVR-2026-0214-002 ---
+[addendum content from override, if any exist for this standard]
+--- End Addendum ---
+
 --- End Standard ---
 
 These standards cover:
@@ -171,6 +190,8 @@ These standards cover:
 - Error codes, exception handling, error responses
 - File naming, variable naming conventions
 ```
+
+**Note:** When copying content, include active addendums inline. Mention they are temporary and may be removed when the override is resolved.
 
 ---
 
@@ -217,6 +238,10 @@ Include the following standards content in your plan:
 
 [full content of the standard file]
 
+--- Active Addendum: OVR-2026-0214-002 ---
+[addendum content from override, if any exist for this standard]
+--- End Addendum ---
+
 --- End Standard ---
 
 These standards cover:
@@ -224,6 +249,8 @@ These standards cover:
 - Error codes, exception handling, error responses
 - File naming, variable naming conventions
 ```
+
+**Note:** When copying content, include active addendums inline. Mention they are temporary and may be removed when the override is resolved.
 
 ---
 

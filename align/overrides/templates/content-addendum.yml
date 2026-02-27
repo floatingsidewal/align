@@ -1,0 +1,40 @@
+# Content Addendum Override Template
+# Use this to add temporary content to standards or docs
+
+id: OVR-YYYY-MMDD-NNN  # Auto-generated: OVR-{year}-{monthday}-{sequence}
+type: content-addendum
+status: active  # active, resolved
+
+# Human-readable metadata
+title: ""  # Brief description of the addendum
+description: |
+  Why this addendum exists and what it adds.
+
+# Scope: What does this override affect?
+scope:
+  # Which standards/docs this adds content to
+  standards: []     # Standards to augment: [api/error-codes]
+  documents: []     # Other docs: [docs/troubleshooting.md]
+
+# Severity determines how prominently this is surfaced
+severity: info  # info, warning, critical
+
+# Timing
+created: ""        # ISO 8601: 2026-02-15T10:30:00Z
+created_by: ""     # Person or agent that created this
+expires: ""        # Optional: when this should be reviewed/removed
+
+# Related references
+references:
+  incident: ""     # INC-1234, or link
+  pr: ""           # PR that will absorb this
+  issue: ""        # GitHub issue tracking the fix
+
+# The addendum content
+addendum:
+  position: append  # prepend, append, after_section
+  section: ""       # If after_section, which section to follow
+  content: |
+    The additional content to include.
+
+    Can be multi-line markdown.

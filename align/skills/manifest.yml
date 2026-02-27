@@ -1,0 +1,38 @@
+# Skills Manifest
+# Registry of project-specific skills that can be shipped to ~/.claude/skills/
+
+version: "1.0"
+
+# Metadata about this skill collection
+metadata:
+  project: ""           # Project name
+  description: ""       # What these skills do
+  maintainer: ""        # Who maintains these skills
+
+# Skills defined in this project
+skills: []
+  # Example entry:
+  # - name: create-api-endpoint
+  #   description: Scaffolds new API endpoints following project standards
+  #   path: create-api-endpoint/   # Folder containing SKILL.md
+  #   version: "1.0.0"
+  #
+  #   # Standards this skill requires
+  #   standards:
+  #     bundled: []       # Standards to copy into the skill
+  #     referenced: []    # Standards to reference via @path
+  #
+  #   # Dependencies on other skills
+  #   depends_on: []
+  #
+  #   # Deployment info (auto-populated by /align-ship)
+  #   deployed:
+  #     path: ""          # Where it was deployed
+  #     version: ""       # Version that was deployed
+  #     date: ""          # When it was deployed
+
+# Deployment configuration
+deployment:
+  target: ~/.claude/skills/    # Where to deploy skills
+  prefix: ""                   # Optional prefix for skill names
+  backup: true                 # Backup existing skills before overwrite

@@ -1,0 +1,42 @@
+# Procedure Update Override Template
+# Use this for temporary changes to runbooks or procedures
+
+id: OVR-YYYY-MMDD-NNN  # Auto-generated: OVR-{year}-{monthday}-{sequence}
+type: procedure-update
+status: active  # active, resolved
+
+# Human-readable metadata
+title: ""  # Brief description of the procedure change
+description: |
+  Why this procedure update exists.
+
+# Scope: What does this override affect?
+scope:
+  # Which procedures/runbooks this modifies
+  runbooks: []          # Runbooks to modify: [deploy-production]
+  procedures: []        # Other procedures: [incident-response]
+  workflows: []         # CI/automation workflows affected
+
+# Severity determines how prominently this is surfaced
+severity: warning  # info, warning, critical
+
+# Timing
+created: ""        # ISO 8601: 2026-02-15T10:30:00Z
+created_by: ""     # Person or agent that created this
+expires: ""        # Optional: when this should be reviewed/removed
+
+# Related references
+references:
+  incident: ""     # INC-1234, or link
+  pr: ""           # PR that will absorb this
+  issue: ""        # GitHub issue tracking the fix
+
+# The procedure update
+update:
+  action: add_step       # add_step, modify_step, add_warning, skip_step
+  target_step: ""        # Which step to modify (if applicable)
+  position: before       # before, after, replace
+  content: |
+    The updated procedure content or new step.
+
+    Be specific and actionable.

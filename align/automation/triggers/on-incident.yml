@@ -1,0 +1,146 @@
+# On-Incident Trigger Configuration
+# Maps production incidents to override creation
+
+name: on-incident
+description: Automatically creates overrides when production incidents are detected
+
+# Incident sources this trigger monitors
+sources:
+  # PagerDuty integration
+  pagerduty:
+    enabled: false
+    webhook_path: /webhooks/pagerduty
+    severity_mapping:
+      P1: critical
+      P2: warning
+      P3: info
+
+  # GitHub issue labels
+  github_issues:
+    enabled: true
+    labels:
+      - production-incident
+      - outage
+      - critical-bug
+
+  # Manual trigger via CLI
+  manual:
+    enabled: true
+    command: "/align-override create --from-incident"
+
+# Mapping rules: incident → override
+rules:
+  - name: critical-incident
+    condition:
+      severity: critical
+      # Or specific service affected
+      service_pattern: "api-*"
+    action:
+      create_override:
+        type: behavior-patch
+        severity: critical
+        auto_scope: true  # Infer scope from incident details
+        expires_days: 7
+        notify:
+          - slack: "#incidents"
+          - email: "oncall@example.com"
+
+  - name: data-incident
+    condition:
+      severity: [critical, warning]
+      tags: [data, database, migration]
+    action:
+      create_override:
+        type: procedure-update
+        severity: warning
+        scope:
+          runbooks: [deploy-production, run-migrations]
+        expires_days: 14
+
+  - name: documentation-gap
+    condition:
+      severity: info
+      tags: [docs, missing-docs, unclear]
+    action:
+      create_override:
+        type: content-addendum
+        severity: info
+        auto_scope: true
+        expires_days: 30
+
+# Override template for incidents
+override_template:
+  title: "INC-{{ incident.id }}: {{ incident.title | truncate(50) }}"
+  description: |
+    Auto-generated from production incident.
+
+    **Incident:** {{ incident.id }}
+    **Severity:** {{ incident.severity }}
+    **Service:** {{ incident.service }}
+    **Time:** {{ incident.created_at }}
+
+    ## Summary
+    {{ incident.summary }}
+
+    ## Impact
+    {{ incident.impact }}
+
+    ## Workaround
+    {{ incident.workaround | default('See patch instructions below.') }}
+
+  patch_content: |
+    ## Temporary Patch (until incident resolved)
+
+    {{ incident.workaround }}
+
+    ## What to Watch For
+
+    - {{ incident.symptoms | join('\n- ') }}
+
+    ## Escalation
+
+    If this occurs again, contact: {{ incident.oncall }}
+
+# Deduplication
+deduplication:
+  enabled: true
+  window_hours: 24
+  match_fields:
+    - incident.service
+    - incident.error_type
+
+# Notifications
+notifications:
+  on_override_created:
+    - type: slack
+      channel: "#engineering"
+      message: |
+        :warning: Override created from incident
+
+        *{{ override.id }}*: {{ override.title }}
+        Severity: {{ override.severity }}
+        Expires: {{ override.expires | date }}
+
+        View: `cat align/overrides/active/{{ override.id }}/patch.md`
+
+    - type: github_issue_comment
+      body: |
+        Override created: **{{ override.id }}**
+
+        This override will be applied to relevant work until resolved.
+
+  on_override_expired:
+    - type: slack
+      channel: "#engineering"
+      message: |
+        :clock: Override from incident has expired
+
+        *{{ override.id }}*: {{ override.title }}
+
+        Please resolve or extend: `/align-override resolve {{ override.id }}`
+
+# Audit logging
+audit:
+  enabled: true
+  log_path: align/overrides/audit.log
+  retention_days: 90

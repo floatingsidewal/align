@@ -18,6 +18,8 @@ Verify these paths exist:
 - `align/standards/`
 - `align/features/`
 - `align/support/`
+- `align/overrides/` (optional)
+- `align/skills/` (optional)
 
 ### Step 2: Gather Metrics
 
@@ -41,6 +43,17 @@ Verify these paths exist:
 - Count files in `align/support/troubleshooting/`
 - Count files in `align/support/runbooks/`
 
+**Overrides:**
+- Read `align/overrides/registry.yml` if it exists
+- Count active overrides
+- Count by severity (critical, warning, info)
+- Note any expired overrides that need attention
+
+**Skills:**
+- Check for `align/skills/manifest.yml`
+- Count skills in manifest
+- Check deployment status (compare to `~/.claude/skills/`)
+
 ### Step 3: Present Status
 
 Format output:
@@ -63,6 +76,16 @@ Format output:
 - 2 in progress (no summary.md)
 - Most recent: 2026-01-22-user-auth
 
+## Overrides
+- 3 active (1 critical, 2 warning)
+- 0 expired needing attention
+- Most recent: OVR-2026-0215-001
+
+## Skills
+- 4 skills defined
+- 3 deployed to ~/.claude/skills/
+- 1 needs deployment
+
 ## Support
 - 3 guides
 - 5 troubleshooting docs
@@ -71,6 +94,8 @@ Format output:
 ## Suggestions
 - [ ] Add tech-stack.md — Run `/plan-product`
 - [ ] Finalize "user-auth" spec — Run `/align` to wrap up
+- [ ] Review critical override OVR-2026-0215-001
+- [ ] Deploy "new-skill" — Run `/align-ship`
 ```
 
 ### Step 4: Suggest Next Actions
@@ -85,11 +110,19 @@ Based on gaps, suggest commands:
 | Index out of date | Run `/index-standards` |
 | Unfinalized specs | Run `/align` on the active spec |
 | No support docs | Consider `/create-support-doc` |
+| Critical overrides exist | Review with `/align-override list` |
+| Expired overrides | Resolve with `/align-override resolve <id>` |
+| Undeployed skills | Deploy with `/align-ship` |
 
 ## Quick Mode
 
 If user runs `/align-status quick` or `/align status`, just show counts:
 
 ```
-Product: 2/3 | Standards: 12 | Specs: 8 (2 active) | Support: 10
+Product: 2/3 | Standards: 12 | Specs: 8 (2 active) | Overrides: 3 | Skills: 4 | Support: 10
+```
+
+Include warning indicator if critical overrides exist:
+```
+Product: 2/3 | Standards: 12 | Specs: 8 (2 active) | Overrides: 3 (!) | Skills: 4 | Support: 10
 ```

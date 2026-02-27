@@ -12,6 +12,9 @@ A lightweight framework for keeping AI agents aligned with your project.
 - **Standards** — Document your coding patterns so agents follow them
 - **Specs** — Structure feature planning for better builds
 - **Support** — Create troubleshooting guides and runbooks
+- **Overrides** — Temporary patches for production issues (human or agent-created)
+- **Skills** — Project-specific skills that can be shipped and deployed
+- **Automation** — CI/agent workflow definitions for GitHub Actions and support agents
 
 ## Quick Start by Scenario
 
@@ -59,7 +62,18 @@ align/
 ├── product/      # Mission, roadmap, tech decisions
 ├── standards/    # Coding standards for agent alignment
 ├── features/     # Feature specifications
-└── support/      # Guides, troubleshooting, runbooks
+├── support/      # Guides, troubleshooting, runbooks
+├── overrides/    # Production override system
+│   ├── registry.yml      # Machine-readable index
+│   ├── active/           # Current overrides
+│   ├── resolved/         # Historical overrides
+│   └── templates/        # Override type templates
+├── skills/       # Project-specific skills
+│   └── manifest.yml      # Skill registry
+└── automation/   # CI/Agent workflows
+    ├── workflows/        # GitHub Actions
+    ├── agents/           # Agent configurations
+    └── triggers/         # Event-to-action mappings
 ```
 
 ## Commands Reference
@@ -69,9 +83,9 @@ Available as Claude Code slash commands (installed to `.claude/commands/`):
 ### Primary
 
 - **`/align`** — The main command. Auto-detects mode:
-  - **Shape mode**: Plan new work, pull standards, optionally from GitHub issues
-  - **Finalize mode**: Update specs, extract new standards, generate summary
-- **`/align-status`** — Show current alignment state, gaps, and suggestions
+  - **Shape mode**: Plan new work, pull standards, check active overrides
+  - **Finalize mode**: Update specs, extract new standards, verify override compliance
+- **`/align-status`** — Show current alignment state, gaps, overrides, and suggestions
 
 ### Setup & Discovery
 
@@ -80,12 +94,74 @@ Available as Claude Code slash commands (installed to `.claude/commands/`):
 
 ### During Work
 
-- **`/inject-standards`** — Load relevant standards into agent context
+- **`/inject-standards`** — Load relevant standards into agent context (includes active addendums)
 - **`/shape-spec`** — Plan individual features with structure
+
+### Overrides
+
+- **`/align-override`** — Create and manage production overrides
+  - Create mode: Guided override creation (behavior-patch, content-addendum, procedure-update)
+  - List mode: View active/expired overrides
+  - Resolve mode: Mark overrides as absorbed, superseded, or expired
+- **`/align-override-check`** — Check for active overrides relevant to current work
+
+### Skills
+
+- **`/align-ship`** — Package and deploy project-specific skills
+  - Deploy skills from `align/skills/` to `~/.claude/skills/`
+  - Choose standards bundling (bundled, referenced, or skip)
+  - Track deployment status and versions
 
 ### Support
 
 - **`/create-support-doc`** — Document troubleshooting procedures and runbooks
+
+## Override System
+
+Overrides are temporary patches that address production issues without modifying permanent standards.
+
+### Override Types
+
+| Type | Purpose | Example |
+|------|---------|---------|
+| **behavior-patch** | Modifies skill/command behavior | Extra validation step |
+| **content-addendum** | Adds to standards/docs | Missing error codes |
+| **procedure-update** | Temporary runbook change | Extra deploy step |
+
+### Override Lifecycle
+
+```
+Production Issue → Create Override → Active → Resolution → Absorbed/Archived
+       ↓                 ↓              ↓          ↓
+   INC-XXX        OVR-YYYY-MMDD    Applied    PR merged
+```
+
+Overrides use structured IDs (`OVR-2026-0215-001`) for machine parsing and are automatically surfaced when running `/align` or `/inject-standards`.
+
+## Skills System
+
+Project-specific skills live in `align/skills/` and can be deployed to `~/.claude/skills/`.
+
+```yaml
+# align/skills/manifest.yml
+skills:
+  - name: create-api-endpoint
+    version: "1.0.0"
+    standards:
+      referenced: [api/response-format, api/error-handling]
+```
+
+Deploy with `/align-ship` to make skills available in Claude Code.
+
+## Automation
+
+The `align/automation/` directory contains configurations for CI/CD and AI agents:
+
+- **workflows/** — GitHub Actions for override processing
+- **agents/** — Configurations for support triage, milestone planning
+- **triggers/** — Event-to-action mappings (e.g., incident → override)
+
+These enable AI agents in CI to create overrides, plan work, and respond to production events.
 
 ## Installation
 

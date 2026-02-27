@@ -1,0 +1,127 @@
+# Support Triage Agent Configuration
+# Defines how an AI agent should triage incoming support issues
+
+name: support-triage
+description: Triages incoming issues and creates overrides when needed
+
+# When this agent should be triggered
+triggers:
+  - event: issue.created
+    labels: [bug, support, production]
+  - event: issue.labeled
+    labels: [needs-triage]
+  - event: workflow_dispatch
+
+# Agent capabilities and permissions
+capabilities:
+  read:
+    - align/overrides/
+    - align/standards/
+    - align/support/
+  write:
+    - align/overrides/active/
+    - align/overrides/registry.yml
+  actions:
+    - create_override
+    - comment_on_issue
+    - add_labels
+
+# Triage workflow
+workflow:
+  steps:
+    - name: Analyze Issue
+      action: analyze
+      inputs:
+        source: issue.body
+        context:
+          - align/standards/index.yml
+          - align/support/troubleshooting/
+      outputs:
+        - category     # bug, question, feature, production-issue
+        - severity     # info, warning, critical
+        - affected_areas  # list of standards/paths affected
+
+    - name: Check Existing Overrides
+      action: search
+      inputs:
+        path: align/overrides/registry.yml
+        filter:
+          status: active
+          scope: "{{ affected_areas }}"
+      outputs:
+        - matching_overrides
+
+    - name: Decide Action
+      action: decide
+      conditions:
+        - if: category == 'production-issue' && matching_overrides.length == 0
+          then: create_override
+        - if: matching_overrides.length > 0
+          then: link_existing
+        - else: triage_only
+
+    - name: Create Override
+      action: create_override
+      when: decision == 'create_override'
+      inputs:
+        type: "{{ severity == 'critical' ? 'behavior-patch' : 'content-addendum' }}"
+        title: "Issue #{{ issue.number }}: {{ issue.title | truncate(50) }}"
+        description: |
+          Auto-generated from issue #{{ issue.number }}.
+
+          {{ issue.body | truncate(500) }}
+        scope:
+          standards: "{{ affected_areas }}"
+        severity: "{{ severity }}"
+        references:
+          issue: "#{{ issue.number }}"
+      outputs:
+        - override_id
+
+    - name: Comment on Issue
+      action: comment
+      inputs:
+        body: |
+          ## Triage Complete
+
+          **Category:** {{ category }}
+          **Severity:** {{ severity }}
+          **Affected Areas:** {{ affected_areas | join(', ') }}
+
+          {% if override_id %}
+          **Override Created:** {{ override_id }}
+
+          This override will be applied to relevant work until the issue is resolved.
+          {% endif %}
+
+          {% if matching_overrides.length > 0 %}
+          **Related Overrides:**
+          {% for o in matching_overrides %}
+          - {{ o.id }}: {{ o.title }}
+          {% endfor %}
+          {% endif %}
+
+    - name: Add Labels
+      action: add_labels
+      inputs:
+        labels:
+          - "triage:{{ category }}"
+          - "severity:{{ severity }}"
+
+# Error handling
+on_error:
+  action: comment
+  inputs:
+    body: |
+      Automated triage encountered an error:
+
+      ```
+      {{ error.message }}
+      ```
+
+      Manual triage required.
+
+# Rate limiting
+rate_limit:
+  max_per_hour: 20
+  cooldown_seconds: 60

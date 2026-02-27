@@ -40,6 +40,34 @@ What are we building?
 Describe the feature or point me to a GitHub issue.
 ```
 
+### Step 1.5: Check Active Overrides
+
+Read `align/overrides/registry.yml` if it exists.
+
+Filter overrides by relevance:
+- Match scope.skills against skills that might be used
+- Match scope.standards against relevant standards
+- Match scope.paths against files likely to be touched
+
+If relevant overrides exist, present them:
+```
+Active overrides relevant to this work:
+
+**OVR-2026-0215-001** (warning) - Extra validation for user registration
+  Scope: create-api-endpoint skill, api/validation standard
+  → Validate that email field is non-empty before processing.
+
+**OVR-2026-0214-002** (info) - Additional error codes
+  Scope: api/error-codes standard
+  → Include new AUTH_EXPIRED code in error handling.
+
+These patches will be applied during your work. Proceed? (yes / view details / dismiss)
+```
+
+If user chooses "view details", read the full `patch.md` for each override.
+
+If no relevant overrides, silently continue to Step 2.
+
 ### Step 2: Pull Relevant Standards
 
 Read `align/standards/index.yml` and identify relevant standards.
@@ -87,6 +115,24 @@ Which spec are we finalizing?
 1. 2026-01-20-1430-user-auth
 2. 2026-01-22-0900-api-refactor
 ```
+
+### Step 1.5: Check Override Compliance
+
+Read `align/overrides/registry.yml` if it exists.
+
+Check if any active overrides were relevant to this work:
+- Review the spec's `standards.md` to find related standards
+- Check git diff for paths that match override scopes
+
+If overrides were relevant, verify compliance:
+```
+Overrides that applied to this work:
+
+**OVR-2026-0215-001** - Extra validation for user registration
+  → Was email validation included? (yes / no / not applicable)
+```
+
+Track override compliance in the summary later.
 
 ### Step 2: Review What Was Built
 
@@ -150,6 +196,10 @@ Create `align/features/{folder}/summary.md`:
 
 ## Scope Changes
 - [any deviations from original plan]
+
+## Override Compliance
+- [list overrides that applied and whether they were followed]
+- OVR-2026-0215-001: Applied (email validation added)
 
 ## New Standards Extracted
 - [list any new standards created]

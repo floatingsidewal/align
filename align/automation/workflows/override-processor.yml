@@ -1,0 +1,122 @@
+# Override Processor Workflow
+# GitHub Action that processes overrides automatically
+
+name: Override Processor
+
+on:
+  # Run on push to override files
+  push:
+    paths:
+      - 'align/overrides/**'
+
+  # Run on schedule to check for expired overrides
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9 AM UTC
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'check-expired'
+        type: choice
+        options:
+          - check-expired
+          - validate-all
+          - generate-report
+
+jobs:
+  process-overrides:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate Override Schema
+        if: github.event_name == 'push'
+        run: |
+          # Validate that new/modified overrides follow schema
+          python scripts/validate-overrides.py align/overrides/
+
+      - name: Check for Expired Overrides
+        id: check-expired
+        run: |
+          python scripts/check-expired-overrides.py align/overrides/registry.yml
+        continue-on-error: true
+
+      - name: Create Issue for Expired Overrides
+        if: steps.check-expired.outputs.expired_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const expired = JSON.parse('${{ steps.check-expired.outputs.expired_json }}');
+
+            const body = `## Expired Overrides Detected
+
+            The following overrides have passed their expiration date and need attention:
+
+            ${expired.map(o => `- **${o.id}**: ${o.title} (expired ${o.expires})`).join('\n')}
+
+            ### Actions Required
+
+            For each override, decide:
+            1. **Resolve** if the underlying issue is fixed
+            2. **Extend** if more time is needed
+            3. **Convert** to permanent standard if it should be kept
+
+            Use \`/align-override resolve <id>\` to resolve.
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Override] ${expired.length} expired override(s) need attention`,
+              body: body,
+              labels: ['override', 'maintenance']
+            });
+
+      - name: Update Registry
+        if: github.event_name == 'push'
+        run: |
+          # Sync registry.yml with actual override files
+          python scripts/sync-override-registry.py align/overrides/
+
+      - name: Commit Registry Updates
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync override registry"
+          file_pattern: align/overrides/registry.yml
+
+  generate-report:
+    if: github.event.inputs.action == 'generate-report'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Override Report
+        run: |
+          python scripts/generate-override-report.py align/overrides/ > override-report.md
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: override-report
+          path: override-report.md
+
+# Note: The Python scripts referenced above should be created in a scripts/ directory
+# They handle:
+# - validate-overrides.py: Schema validation
+# - check-expired-overrides.py: Find expired overrides
+# - sync-override-registry.py: Keep registry in sync with files
+# - generate-override-report.py: Create markdown report

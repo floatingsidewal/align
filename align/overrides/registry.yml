@@ -1,0 +1,28 @@
+# Override Registry
+# Machine-readable index of all active overrides
+# Agents and CI can parse this to find relevant patches
+
+version: "1.0"
+
+# Active overrides that should be applied
+active: []
+  # Example entry:
+  # - id: OVR-2026-0215-001
+  #   type: behavior-patch
+  #   title: Add extra validation to user registration
+  #   scope:
+  #     skills: [create-api-endpoint]
+  #     standards: [api/validation]
+  #     paths: [src/api/users/*]
+  #   severity: warning  # info, warning, critical
+  #   created: 2026-02-15T10:30:00Z
+  #   expires: 2026-03-15T10:30:00Z
+  #   incident: INC-1234  # optional reference
+
+# Recently resolved overrides (for audit trail)
+resolved: []
+  # Example entry:
+  # - id: OVR-2026-0115-001
+  #   resolution: absorbed  # absorbed, superseded, expired, invalid
+  #   resolved_date: 2026-02-01T14:00:00Z
+  #   resolved_by: PR-456  # optional reference

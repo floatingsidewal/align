@@ -1,0 +1,173 @@
+# Milestone Planner Agent Configuration
+# Helps plan and track milestones based on specs and overrides
+
+name: milestone-planner
+description: Plans milestones and tracks progress across specs and overrides
+
+# When this agent should be triggered
+triggers:
+  - event: schedule
+    cron: '0 8 * * 1'  # Every Monday at 8 AM
+  - event: milestone.created
+  - event: workflow_dispatch
+    inputs:
+      milestone_id:
+        description: 'Specific milestone to analyze'
+        required: false
+
+# Agent capabilities
+capabilities:
+  read:
+    - align/features/
+    - align/overrides/
+    - align/standards/
+  write:
+    - align/features/*/plan.md
+  actions:
+    - analyze_specs
+    - analyze_overrides
+    - update_milestone
+    - create_report
+    - comment_on_issues
+
+# Planning workflow
+workflow:
+  steps:
+    - name: Gather Active Work
+      action: gather
+      inputs:
+        sources:
+          - path: align/features/
+            filter: "!summary.md"  # Specs without summary are active
+          - path: align/overrides/registry.yml
+            filter: "status: active"
+      outputs:
+        - active_specs
+        - active_overrides
+
+    - name: Analyze Dependencies
+      action: analyze
+      inputs:
+        specs: "{{ active_specs }}"
+        overrides: "{{ active_overrides }}"
+      outputs:
+        - dependency_graph
+        - blocked_items
+        - critical_path
+
+    - name: Calculate Progress
+      action: calculate
+      inputs:
+        specs: "{{ active_specs }}"
+        weight_by: complexity  # or count, or effort
+      outputs:
+        - completion_percentage
+        - estimated_remaining
+        - velocity
+
+    - name: Identify Risks
+      action: identify_risks
+      inputs:
+        overrides: "{{ active_overrides }}"
+        specs: "{{ active_specs }}"
+      rules:
+        - name: expiring_overrides
+          condition: override.expires < now() + 7.days
+          severity: warning
+          message: "Override {{ override.id }} expires in {{ days_until(override.expires) }} days"
+
+        - name: stale_specs
+          condition: spec.updated_at < now() - 14.days
+          severity: info
+          message: "Spec {{ spec.name }} hasn't been updated in {{ days_since(spec.updated_at) }} days"
+
+        - name: critical_overrides
+          condition: override.severity == 'critical'
+          severity: critical
+          message: "Critical override {{ override.id }} still active"
+      outputs:
+        - risks
+
+    - name: Generate Report
+      action: create_report
+      inputs:
+        template: milestone-report
+        data:
+          active_specs: "{{ active_specs }}"
+          active_overrides: "{{ active_overrides }}"
+          completion: "{{ completion_percentage }}"
+          risks: "{{ risks }}"
+          critical_path: "{{ critical_path }}"
+      outputs:
+        - report_path
+
+# Report template
+templates:
+  milestone-report: |
+    # Milestone Planning Report
+
+    Generated: {{ now() | date }}
+
+    ## Summary
+
+    - **Active Specs:** {{ active_specs | length }}
+    - **Active Overrides:** {{ active_overrides | length }}
+    - **Completion:** {{ completion }}%
+
+    ## Active Work
+
+    ### Specs in Progress
+
+    {% for spec in active_specs %}
+    - **{{ spec.name }}** ({{ spec.folder }})
+      - Started: {{ spec.created_at | date }}
+      - Standards: {{ spec.standards | join(', ') }}
+    {% endfor %}
+
+    ### Active Overrides
+
+    {% for override in active_overrides %}
+    - **{{ override.id }}** [{{ override.severity }}]
+      - {{ override.title }}
+      - Expires: {{ override.expires | date }}
+    {% endfor %}
+
+    ## Risks
+
+    {% for risk in risks %}
+    ### {{ risk.severity | upper }}: {{ risk.name }}
+    {{ risk.message }}
+    {% endfor %}
+
+    ## Critical Path
+
+    {% for item in critical_path %}
+    {{ loop.index }}. {{ item.name }} ({{ item.type }})
+    {% endfor %}
+
+    ## Recommendations
+
+    {% if risks | selectattr('severity', 'eq', 'critical') | list | length > 0 %}
+    - Address critical overrides before continuing feature work
+    {% endif %}
+
+    {% if active_overrides | selectattr('expires', 'lt', now() + 7.days) | list | length > 0 %}
+    - Review expiring overrides and resolve or extend
+    {% endif %}
+
+# Integration with external systems
+integrations:
+  github:
+    enabled: true
+    actions:
+      - update_project_board
+      - post_to_discussions
+
+  slack:
+    enabled: false
+    webhook: ""
+    channel: "#engineering"
+
+# Rate limiting
+rate_limit:
+  max_per_day: 5
